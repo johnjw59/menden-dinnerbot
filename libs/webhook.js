@@ -2,9 +2,21 @@
  * Functionality for Slack webhook.
  */
 
+/**
+ * Post a reminder on a schedule.
+ */
 exports.init = function() {
-  // Set as scheduled task.
-  postReminder();
+  var schedule = require('node-schedule');
+
+  // We're going to post every Thursday at 5pm.
+  var rule = new schedule.RecurrenceRule();
+  rule.dayOfWeek = 4;
+  rule.hour = 17;
+  rule.minute = 0;
+
+  schedule.scheduleJob(rule, function() {
+    postReminder();
+  });
 }
 
 /**
@@ -46,7 +58,9 @@ function postReminder() {
     data.current = nextUp.follower;
 
     jsonfile.writeFile(dataFile, data, function(err) {
-      console.error(err);
+      if (!!err) {
+        console.error(err);
+      }
     })
   }
 }
