@@ -10,7 +10,6 @@
 function getNext() {
   var next;
   var date = new Date();
-
   date.setDate(date.getDate() + (1 + 7 - date.getDay()) % 7);
   date.setHours(0);
   date.setMinutes(0);
@@ -115,6 +114,43 @@ function swapUsers(user1, user2) {
   }
 }
 
+/**
+ * Remove a date from the schedule.
+ * Will move everyone on or after the given date forward one week.
+ *
+ * @param {int} date
+ *        The date to postpone. Defaults to the closest Monday.
+ */
+function postpone(date) {
+  var data = getData();
+
+  if (typeof date === 'undefined') {
+    date = new Date();
+    date.setDate(date.getDate() + (1 + 7 - date.getDay()) % 7);
+    date.setHours(0);
+    date.setMinutes(0);
+    date.setSeconds(0);
+  }
+  else {
+    date = new Date(date);
+  }
+
+  for (var i=0; i < data.schedule.length; i++) {
+    console.log(Date.parse(date));
+
+    if (data.schedule[i].next >= Date.parse(date)) {
+      var newDate = new Date(data.schedule[i].next);
+      newDate.setDate(newDate.getDate() + 7);
+
+      console.log(data.schedule[i].users);
+      console.log('update to ' + Date.parse(newDate));
+
+      data.schedule[i].next = Date.parse(newDate);
+    }
+  }
+
+  setData(data);
+}
 
 /*******************************
  **     HELPER FUNCTIONS      **
@@ -145,4 +181,5 @@ module.exports = {
   getDate: getDate,
   updateNext: updateNext,
   swapUsers: swapUsers,
+  postpone: postpone
 };
