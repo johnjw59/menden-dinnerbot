@@ -17,7 +17,7 @@ exports.init = function() {
   schedule.scheduleJob(rule, function() {
     postReminder();
   });
-}
+};
 
 /**
  * Post reminder about who's next on dinners.
@@ -61,7 +61,7 @@ function postReminder() {
       if (!!err) {
         console.error(err);
       }
-    })
+    });
   }
 }
 
