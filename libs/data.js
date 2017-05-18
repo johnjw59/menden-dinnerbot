@@ -41,9 +41,7 @@ function getNext() {
  *         An array containing usernames.
  */
 function getUsers(date) {
-  var jsonfile = require('jsonfile');
-  var dataFile = 'data/schedule.json';
-  var data = jsonfile.readFileSync(dataFile);
+  var data = getData();
 
   for (var i=0; i < data.schedule.length; i++) {
     if (data.schedule[i].next == date) {
@@ -64,9 +62,7 @@ function getUsers(date) {
  *         A UNIX timecode.
  */
 function getDate(user) {
-  var jsonfile = require('jsonfile');
-  var dataFile = 'data/schedule.json';
-  var data = jsonfile.readFileSync(dataFile);
+  var data = getData();
 
   for (var i=0; i < data.schedule.length; i++) {
     if (data.schedule[i].users.indexOf(user) > -1) {
@@ -77,8 +73,76 @@ function getDate(user) {
   return null;
 }
 
+/**
+ * Update the "next" value for a given user.
+ *
+ * @param {string} user
+ *        The username of the user in question.
+ *
+ * @param {int} date
+ *        The timecode to assign to the user.
+ */
+function updateNext(user, date) {
+  var data = getData();
+
+  for (var i=0; i < data.schedule.length; i++) {
+    if (data.schedule[i].users.indexOf(user) > -1) {
+      data.schedule[i].next = date;
+    }
+  }
+
+  setData(data);
+}
+
+/**
+ * Swap the "next" dates of two users
+ *
+ * @param {string} user1
+ *        The username of a user.
+ *
+ * @param {string} user2
+ *        The username of a user. Should not be in same group as user1
+ */
+function swapUsers(user1, user2) {
+  var data = getData();
+
+  var date1 = get(user1);
+  var date2 = get(user2);
+
+  if (date1 != date2) {
+    updateNext(user1, date2);
+    updateNext(user2, date1);
+  }
+}
+
+
+/*******************************
+ **     HELPER FUNCTIONS      **
+ *******************************/
+
+function getData() {
+  var jsonfile = require('jsonfile');
+  var dataFile = 'data/schedule.json';
+
+  return jsonfile.readFileSync(dataFile);
+}
+
+function setData(data) {
+  var jsonfile = require('jsonfile');
+  var dataFile = 'data/schedule.json';
+
+  jsonfile.writeFile(dataFile, data, function(err) {
+    if (!!err) {
+      console.error(err);
+    }
+  });
+}
+
+
 module.exports = {
   getNext: getNext,
   getUsers: getUsers,
   getDate: getDate,
+  updateNext: updateNext,
+  swapUsers: swapUsers,
 };
