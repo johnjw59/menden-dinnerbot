@@ -5,7 +5,9 @@
 /**
  * Looks for the next person by date by making calls to get().
  *
- * @return see get()
+ * @return {object}
+ *         An object containing an array of usernames of the next users
+ *         and the date they will be on.
  */
 function getNext() {
   var next;
@@ -27,7 +29,34 @@ function getNext() {
     }
   }
 
-  return next;
+  return {
+    next: Date.parse(date),
+    users: next
+  };
+}
+
+/**
+ * Get the pair who are after a certain date.
+ *
+ * @param {int} date
+ *        The starting date.
+ *        We want a user with the closest date greater than this.
+ *
+ * @return {object}
+ *         The schedule object for the followers.
+ *         Includes date and array of users.
+ */
+function getFollower(date) {
+  var data = getData();
+  var follower = null;
+
+  for (var i=0; i < data.schedule.length; i++) {
+    if ((follower === null) || ((data.schedule[i].next > date) && (data.schedule[i].next < follower.next))) {
+      follower = data.schedule[i];
+    }
+  }
+
+  return follower;
 }
 
 /**
@@ -177,6 +206,7 @@ function setData(data) {
 
 module.exports = {
   getNext: getNext,
+  getFollower: getFollower,
   getUsers: getUsers,
   getDate: getDate,
   updateNext: updateNext,
