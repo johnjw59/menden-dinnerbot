@@ -32,15 +32,6 @@ schedule.scheduleJob(rule, function() {
   updateNext();
 })
 
-web.users.list(function(err, info) {
-  if (!err) {
-    console.log(info);
-  }
-  else {
-    console.error(err);
-  }
-});
-
 /**
  * Send reminder message to #dinners.
  */
