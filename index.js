@@ -6,7 +6,7 @@ var moment = require('moment');
 // Slack includes.
 var RtmClient = require('@slack/client').RtmClient;
 var WebClient = require('@slack/client').WebClient;
-var RTM_CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS.RTM;
+var RTM_EVENTS = require('@slack/client').RTM_EVENTS;
 
 // Local includes.
 var data = require('./libs/data.js');
@@ -15,6 +15,14 @@ var web = new WebClient(process.env.SLACK_API_TOKEN);
 var rtm = new RtmClient(process.env.SLACK_BOT_TOKEN);
 
 rtm.start();
+
+// React to messages.
+rtm.on(RTM_EVENTS.MESSAGE, function(message) {
+  // We only care about regular messages that mention us.
+  if (!('subtype' in message) && (message.text.indexOf('<@U5G5UJ0QN>') != -1)) {
+    console.log(message);
+  }
+});
 
 // Post reminder on schedule.
 var rule = new schedule.RecurrenceRule();
