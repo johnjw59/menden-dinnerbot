@@ -2,6 +2,10 @@
  * Setters and getters for the schedule data.
  */
 
+var moment = require('moment');
+var jsonfile = require('jsonfile');
+var dataFile = 'data/schedule.json';
+
 /**
  * Looks for the next person by date by making calls to get().
  *
@@ -10,27 +14,27 @@
  *         and the date they will be on.
  */
 function getNext() {
-  var next;
-  var date = new Date();
-  date.setDate(date.getDate() + (1 + 7 - date.getDay()) % 7);
-  date.setHours(0);
-  date.setMinutes(0);
-  date.setSeconds(0);
+  // Get next Monday.
+  var date = moment(moment().format('YYYY-MM-DD')).day(1);
+  if (moment().isAfter(date)) {
+    date.day(8);
+  }
 
   // We'll try the next four Mondays.
+  var next;
   for (var i=0; i < 4; i++) {
-    next = getUsers(Date.parse(date));
+    next = getUsers(date.unix());
 
     if (next != null) {
       break;
     }
     else {
-      date.setDate(date.getDate() + 7);
+      date = date.day(8);
     }
   }
 
   return {
-    next: Date.parse(date),
+    next: date.unix(),
     users: next
   };
 }
@@ -102,6 +106,17 @@ function getDate(user) {
 }
 
 /**
+ * Return the schedule object.
+ *
+ * @return {array}
+ *         An array containing an array of users and a date.
+ */
+function getSchedule() {
+  var data = getData();
+  return data.schedule;
+}
+
+/**
  * Update the "next" value for a given user.
  *
  * @param {string} user
@@ -153,28 +168,19 @@ function swapUsers(user1, user2) {
 function postpone(date) {
   var data = getData();
 
+  // Default date to closest monday.
   if (typeof date === 'undefined') {
-    date = new Date();
-    date.setDate(date.getDate() + (1 + 7 - date.getDay()) % 7);
-    date.setHours(0);
-    date.setMinutes(0);
-    date.setSeconds(0);
-  }
-  else {
-    date = new Date(date);
+    date = moment(moment().format('YYYY-MM-DD')).day(1);
+    if (moment().isAfter(date)) {
+      date.day(8);
+    }
+    date = date.unix();
   }
 
   for (var i=0; i < data.schedule.length; i++) {
-    console.log(Date.parse(date));
-
-    if (data.schedule[i].next >= Date.parse(date)) {
-      var newDate = new Date(data.schedule[i].next);
-      newDate.setDate(newDate.getDate() + 7);
-
-      console.log(data.schedule[i].users);
-      console.log('update to ' + Date.parse(newDate));
-
-      data.schedule[i].next = Date.parse(newDate);
+    if (data.schedule[i].next >= date) {
+      var newDate = moment(data.schedule[i].next).add(1, 'w');
+      data.schedule[i].next = newDate.unix();
     }
   }
 
@@ -186,16 +192,10 @@ function postpone(date) {
  *******************************/
 
 function getData() {
-  var jsonfile = require('jsonfile');
-  var dataFile = 'data/schedule.json';
-
   return jsonfile.readFileSync(dataFile);
 }
 
 function setData(data) {
-  var jsonfile = require('jsonfile');
-  var dataFile = 'data/schedule.json';
-
   jsonfile.writeFile(dataFile, data, function(err) {
     if (!!err) {
       console.error(err);
@@ -209,6 +209,7 @@ module.exports = {
   getFollower: getFollower,
   getUsers: getUsers,
   getDate: getDate,
+  getSchedule: getSchedule,
   updateNext: updateNext,
   swapUsers: swapUsers,
   postpone: postpone
