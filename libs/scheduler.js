@@ -179,7 +179,7 @@ function postpone(date) {
 
   for (var i=0; i < data.schedule.length; i++) {
     if (data.schedule[i].next >= date) {
-      var newDate = moment(data.schedule[i].next).add(1, 'w');
+      var newDate = moment(data.schedule[i].next, 'X').add(1, 'w');
       data.schedule[i].next = newDate.unix();
     }
   }
