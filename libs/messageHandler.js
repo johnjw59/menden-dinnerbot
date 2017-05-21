@@ -3,7 +3,7 @@
  */
 
 var moment = require('moment');
-var data = require('./data.js');
+var scheduler = require('./scheduler.js');
 
 var botID = '<@U5G5UJ0QN>';
 
@@ -18,25 +18,23 @@ var botID = '<@U5G5UJ0QN>';
  *         A message to send back to Slack.
  */
 function handleMessage(data) {
-  console.log('\nhandling message.')
   var ret = '';
-  console.log(data.getNext());
-  // switch (data.entities.intent[0].value) {
-  //   case 'get':
-  //     console.log('Its a get!')
-  //     ret = handleGet(data);
-  //     break;
 
-  //   case 'skip':
-  //     ret = handleSkip(data);
-  //     break;
+   switch (data.entities.intent[0].value) {
+     case 'get':
+       ret = handleGet(data);
+       break;
 
-  //   case 'swap':
-  //     ret = handleSwap(data);
-  //     break;
-  // }
+     case 'skip':
+       ret = handleSkip(data);
+       break;
 
-  // return ret;
+     case 'swap':
+       ret = handleSwap(data);
+       break;
+   }
+
+   return ret;
 }
 
 /*******************************
@@ -64,11 +62,9 @@ function handleGet(data) {
 
   }
   else {
-    var next = data.getNext();
-    console.log(next);
-    ret = `<@${next.users[0]}> and <@${next.users[1]}> are on next.`
+    var next = scheduler.getNext();
+    ret = `${next.users[0]} and ${next.users[1]} are on next.`
   }
-  console.log(ret);
 
   return ret;
 }
