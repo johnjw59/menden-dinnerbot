@@ -184,11 +184,9 @@ function getUserID(name, sender) {
   // Check if the name is refering to the person who sent the message.
   return new Promise(function(resolve, reject) {
     if ((name.toLowerCase() == 'i') || (name.toLowerCase() == 'my')) {
-      console.log('its a possesive');
       resolve('<@' + sender + '>');
     }
     else if (name.slice(0, 2) == '<@') {
-      console.log('its a slack userID');
       // Just return slack usernames (wit.ai sometimes drops the ending '>').
       if (name.slice(-1) != '>') {
         name += '>';
@@ -196,7 +194,6 @@ function getUserID(name, sender) {
       resolve(name);
     }
     else {
-      console.log('its a real name');
       // Look for the name in the list of slack users.
       slackWeb.users.list(function(err, data) {
         if (!err) {

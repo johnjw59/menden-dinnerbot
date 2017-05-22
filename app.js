@@ -54,25 +54,12 @@ rtm.on(RTM_EVENTS.MESSAGE, function(message) {
 });
 
 // Post reminder on schedule.
-/*var rule = new schedule.RecurrenceRule();
+var rule = new schedule.RecurrenceRule();
 rule.dayOfWeek = 4;
 rule.hour = 18;
 rule.minute = 30;
 
 schedule.scheduleJob(rule, function() {
-  postReminder();
-});
-
-// Update users next date.
-rule.dayOfWeek = 1;
-schedule.scheduleJob(rule, function() {
-  updateNext();
-})*/
-
-/**
- * Send reminder message to #dinners.
- */
-function postReminder() {
   var next = scheduler.getNext();
   var follower = scheduler.getFollower(next.next);
 
@@ -85,12 +72,11 @@ function postReminder() {
 
     rtm.sendMessage(message, 'C3Q22SRHC');
   }
-}
+});
 
-/**
- * Update the dates users will be on.
- */
-function updateNext() {
+// Update users next date each week.
+rule.dayOfWeek = 1;
+schedule.scheduleJob(rule, function() {
   var today = moment(moment().format('YYYY-MM-DD')).unix();
   var dinnerSchedule = scheduler.getSchedule();
 
@@ -101,4 +87,4 @@ function updateNext() {
       scheduler.updateNext(dinnerSchedule[i].users[0], next.unix());
     }
   }
-}
+});

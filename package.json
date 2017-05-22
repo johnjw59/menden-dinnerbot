@@ -1,19 +1,19 @@
 {
-  "name": "menden-dinners",
+  "name": "menden-dinnerbot",
   "version": "1.0.0",
   "description": "Slack app to provide reminders about house dinners.",
   "main": "app.js",
   "scripts": {},
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/johnjw59/menden-dinners.git"
+    "url": "git+https://github.com/johnjw59/menden-dinnerbot.git"
   },
   "author": "John Wiebe",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/johnjw59/menden-dinners/issues"
+    "url": "https://github.com/johnjw59/menden-dinnerbot/issues"
   },
-  "homepage": "https://github.com/johnjw59/menden-dinners#readme",
+  "homepage": "https://github.com/johnjw59/menden-dinnerbot#readme",
   "dependencies": {
     "@slack/client": "^3.9.0",
     "dotenv": "^4.0.0",
