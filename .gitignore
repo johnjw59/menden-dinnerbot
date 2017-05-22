@@ -58,4 +58,5 @@ typings/
 .env
 
 # Don't keep database files
-data
+data/*
+!data/.gitkeep
