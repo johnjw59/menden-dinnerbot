@@ -84,7 +84,7 @@ function handleGet(data) {
           return Promise.resolve(`Looks like ${user} isn't on the dinner schedule.`);
         }
       }, function(err) {
-        Promise.reject(err);
+        return Promise.reject(err);
       }
     );
   }
@@ -134,7 +134,38 @@ function handleSkip(data) {
  *         A resolved Promise object containing a confirmation message.
  */
 function handleSwap(data) {
-  return Promise.resolve('Whoa, swapping functionality isn\'t done yet!');
+  // We need at least two users to be specified (excluding the bot).
+  if (('contact' in data.entities) && (data.entities.contact.length > 2)) {
+    var users = [];
+
+    for (var i=0; i < data.entities.contact.length; i++) {
+      if (data.entities.contact[i].value.indexOf(botID) == -1) {
+        users.push(data.entities.contact[i].value);
+      }
+    }
+
+    // We'll assume we're swaping the first and last user mentioned.
+    return getUserID(users[0], data.slack.user)
+      .then(function(user1) {
+        return getUserID(users[users.length -1], data.slack.user)
+          .then(function(user2) {
+            var msg = `Looks like ${user1} and ${user2} are already on the same day!`;
+            if (scheduler.swapUsers(user1, user2)) {
+              msg = `Successfully swapped ${user1}'s and ${user2}'s groups days!`;
+            }
+            return Promise.resolve(msg);
+          }, function(err) {
+            return Promise.reject(err);
+          }
+        );
+      }, function(err) {
+        return Promise.reject(err);
+      }
+    );
+  }
+  else {
+    return Promise.resolve('You need to tell me which two users to swap!');
+  }
 }
 
 /**

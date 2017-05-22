@@ -152,8 +152,8 @@ function updateNext(user, date) {
 function swapUsers(user1, user2) {
   var data = getData();
 
-  var date1 = get(user1);
-  var date2 = get(user2);
+  var date1 = getDate(user1);
+  var date2 = getDate(user2);
 
   if (date1 != date2) {
     updateNext(user1, date2);
@@ -194,11 +194,7 @@ function getData() {
 }
 
 function setData(data) {
-  jsonfile.writeFile(dataFile, data, function(err) {
-    if (!!err) {
-      console.error(err);
-    }
-  });
+  jsonfile.writeFileSync(dataFile, data);
 }
 
 
