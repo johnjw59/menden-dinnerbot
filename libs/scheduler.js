@@ -145,6 +145,9 @@ function updateNext(user, date) {
  *
  * @param {string} user2
  *        The username of a user. Should not be in same group as user1
+ *
+ * @return {boolean}
+ *         True if the users aren't in the same group, false otherwise.
  */
 function swapUsers(user1, user2) {
   var data = getData();
@@ -155,7 +158,11 @@ function swapUsers(user1, user2) {
   if (date1 != date2) {
     updateNext(user1, date2);
     updateNext(user2, date1);
+
+    return true;
   }
+
+  return false;
 }
 
 /**
@@ -163,19 +170,10 @@ function swapUsers(user1, user2) {
  * Will move everyone on or after the given date forward one week.
  *
  * @param {int} date
- *        The date to postpone. Defaults to the closest Monday.
+ *        The date to postpone.
  */
 function postpone(date) {
   var data = getData();
-
-  // Default date to closest monday.
-  if (typeof date === 'undefined') {
-    date = moment(moment().format('YYYY-MM-DD')).day(1);
-    if (moment().isAfter(date)) {
-      date.day(8);
-    }
-    date = date.unix();
-  }
 
   for (var i=0; i < data.schedule.length; i++) {
     if (data.schedule[i].next >= date) {
@@ -188,7 +186,7 @@ function postpone(date) {
 }
 
 /*******************************
- **     HELPER FUNCTIONS      **
+ **     PRIVATE FUNCTIONS      **
  *******************************/
 
 function getData() {

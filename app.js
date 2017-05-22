@@ -91,7 +91,7 @@ function postReminder() {
  * Update the dates users will be on.
  */
 function updateNext() {
-  var today = moment(moment().format('YYYY-MM-DD')).unix()
+  var today = moment(moment().format('YYYY-MM-DD')).unix();
   var dinnerSchedule = scheduler.getSchedule();
 
   for (var i=0; i < dinnerSchedule.length; i++) {

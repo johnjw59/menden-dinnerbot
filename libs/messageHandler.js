@@ -31,7 +31,7 @@ function handleMessage(data) {
       return handleSwap(data);
 
     default:
-      return '';
+      return Promise.reject(`Unhandled intent: ${JSON.stringify(data)}`);
    }
 }
 
@@ -105,13 +105,23 @@ function handleGet(data) {
  * @param  {object} data
  *         JSON object from wit.ai.
  *
- * @return {string}
- *         A message to send back to Slack.
+ * @return {Promise}
+ *         A resolved Promise object containing a confirmation message.
  */
 function handleSkip(data) {
+  // Default to skipping next Monday.
+  var date = moment(moment().format('YYYY-MM-DD')).day(1);
+  if (moment().isAfter(date)) {
+    date.day(8);
+  }
 
+  if ('datetime' in data.entities) {
+    date = moment(data.entities.datetime[0].value).day(1);
+  }
 
-  return '';
+  scheduler.postpone(date.unix());
+
+  return Promise.resolve(`I've updated the schedule so there's no dinner on ${date.format('MMM Do')}.`);
 }
 
 /**
@@ -120,13 +130,11 @@ function handleSkip(data) {
  * @param  {object} data
  *         JSON object from wit.ai.
  *
- * @return {string}
- *         A message to send back to Slack.
+ * @return {Promise}
+ *         A resolved Promise object containing a confirmation message.
  */
 function handleSwap(data) {
-
-
-  return '';
+  return Promise.resolve('Whoa, swapping functionality isn\'t done yet!');
 }
 
 /**
@@ -172,7 +180,7 @@ function getUserID(name, sender) {
               }
             }
             // Leave loop if we found a userID.
-            if (userID != null) break;
+            if (userID != null) { break; }
           }
 
           // If everything's failed, just use the name.
