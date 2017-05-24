@@ -2,7 +2,7 @@
 require('dotenv').config();
 var schedule = require('node-schedule');
 var moment = require('moment');
-var {Wit, log} = require('node-wit');
+var Wit = require('node-wit').Wit;
 var RtmClient = require('@slack/client').RtmClient;
 var RTM_EVENTS = require('@slack/client').RTM_EVENTS;
 
