@@ -52,10 +52,10 @@ function getNext() {
  */
 function getFollower(date) {
   var data = getData();
-  var follower = null;
+  var follower = { next: Infinity };
 
   for (var i=0; i < data.schedule.length; i++) {
-    if ((follower === null) || ((data.schedule[i].next > date) && (data.schedule[i].next < follower.next))) {
+    if ((data.schedule[i].next > date) && (data.schedule[i].next < follower.next)) {
       follower = data.schedule[i];
     }
   }
