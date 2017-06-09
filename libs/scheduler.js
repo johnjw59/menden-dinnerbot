@@ -40,6 +40,30 @@ function getNext() {
 }
 
 /**
+ * Looks for the people with the date furthest in the future.
+ *
+ * @return {object}
+ *         An object containing an array of usernames of the next users
+ *         and the date they will be on.
+ */
+function getLast() {
+  var data = getData();
+  var last = {
+    index: 0,
+    date: 0
+  };
+
+  for (var i=0; i < data.schedule.length; i++) {
+    if (data.schedule[i].next > last.date) {
+      last.date = data.schedule[i].next;
+      last.index = i;
+    }
+  }
+
+  return data.schedule[last.index];
+}
+
+/**
  * Get the pair who are after a certain date.
  *
  * @param {int} date
@@ -103,17 +127,6 @@ function getDate(user) {
   }
 
   return null;
-}
-
-/**
- * Return the schedule object.
- *
- * @return {array}
- *         An array containing an array of users and a date.
- */
-function getSchedule() {
-  var data = getData();
-  return data.schedule;
 }
 
 /**
@@ -185,9 +198,9 @@ function postpone(date) {
   setData(data);
 }
 
-/*******************************
- **     PRIVATE FUNCTIONS      **
- *******************************/
+/*********************************
+ **      PRIVATE FUNCTIONS      **
+ *********************************/
 
 function getData() {
   return jsonfile.readFileSync(dataFile);
@@ -200,10 +213,10 @@ function setData(data) {
 
 module.exports = {
   getNext: getNext,
+  getLast: getLast,
   getFollower: getFollower,
   getUsers: getUsers,
   getDate: getDate,
-  getSchedule: getSchedule,
   updateNext: updateNext,
   swapUsers: swapUsers,
   postpone: postpone
