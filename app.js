@@ -77,14 +77,8 @@ schedule.scheduleJob(rule, function() {
 // Update users next date each week.
 rule.dayOfWeek = 1;
 schedule.scheduleJob(rule, function() {
-  var today = moment(moment().format('YYYY-MM-DD')).unix();
-  var dinnerSchedule = scheduler.getSchedule();
+  var last = scheduler.getLast();
+  var curr = scheduler.getUsers(moment(moment().format('YYYY-MM-DD')).day(1).unix());
 
-  for (var i=0; i < dinnerSchedule.length; i++) {
-    if (dinnerSchedule[i].next <= today) {
-      // Advance the users next date by a number of weeks equal to the number of pairs.
-      var next = moment(today).add(dinnerSchedule.length, 'w');
-      scheduler.updateNext(dinnerSchedule[i].users[0], next.unix());
-    }
-  }
+  scheduler.updateNext(curr[0], moment(last.next, 'X').add(1, 'w').unix());
 });
