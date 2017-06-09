@@ -30,6 +30,9 @@ function handleMessage(data) {
     case 'swap':
       return handleSwap(data);
 
+    case 'thanks':
+      return Promise.resolve('You\'re welcome');
+
     default:
       return Promise.reject(`Unhandled intent: ${JSON.stringify(data)}`);
    }
