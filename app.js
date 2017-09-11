@@ -54,12 +54,13 @@ rtm.on(RTM_EVENTS.MESSAGE, function(message) {
 });
 
 // Post reminder on schedule.
-var rule = new schedule.RecurrenceRule();
-rule.dayOfWeek = 4;
-rule.hour = 18;
-rule.minute = 30;
+var recurrence = {
+  dayOfWeek: 4,
+  hour: 18,
+  minute: 30,
+};
 
-schedule.scheduleJob(rule, function() {
+schedule.scheduleJob(recurrence, function() {
   var next = scheduler.getNext();
   var follower = scheduler.getFollower(next.next);
 
@@ -75,8 +76,8 @@ schedule.scheduleJob(rule, function() {
 });
 
 // Update users next date each week.
-rule.dayOfWeek = 1;
-schedule.scheduleJob(rule, function() {
+recurrence.dayOfWeek = 1;
+schedule.scheduleJob(recurrence, function() {
   var last = scheduler.getLast();
   var curr = scheduler.getUsers(moment(moment().format('YYYY-MM-DD')).day(1).unix());
 
