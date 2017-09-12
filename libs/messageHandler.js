@@ -3,7 +3,7 @@
  */
 
 var moment = require('moment');
-var scheduler = require('./scheduler.js');
+var dataHandler = require('./dataHandler.js');
 var WebClient = require('@slack/client').WebClient;
 
 var slackWeb = new WebClient(process.env.SLACK_API_TOKEN);
@@ -57,7 +57,7 @@ function handleGet(data) {
   if ('datetime' in data.entities) {
     // Grab the Monday of the week the date is in.
     var date = moment(data.entities.datetime[0].value).day(1);
-    var users = scheduler.getUsers(date.unix());
+    var users = dataHandler.getUsers(date.unix());
 
     if (Array.isArray(users)) {
       return Promise.resolve(`${users[0]} and ${users[1]} are on ${date.format('MMM Do')}.`);
@@ -73,7 +73,7 @@ function handleGet(data) {
       // Get the userID to use in the lookup and return a message.
       return getUserID(users[0], data.slack.user)
         .then(function(user) {
-          var date = scheduler.getDate(user);
+          var date = dataHandler.getDate(user);
 
           if (date != null) {
             return Promise.resolve(`${user} is doing dinner next on ${moment(date, 'X').format('MMM Do')}`);
@@ -88,7 +88,7 @@ function handleGet(data) {
     }
     else {
       // Default to just grabbing the next people scheduled
-      var next = scheduler.getNext();
+      var next = dataHandler.getNext();
       if (next != null) {
         return Promise.resolve(`${next.users[0]} and ${next.users[1]} are on next.`);
       }
@@ -119,7 +119,7 @@ function handleSkip(data) {
     date = moment(data.entities.datetime[0].value).day(1);
   }
 
-  scheduler.postpone(date.unix());
+  dataHandler.postpone(date.unix());
 
   return Promise.resolve(`I've updated the schedule so there's no dinner on ${date.format('MMM Do')}.`);
 }
@@ -145,7 +145,7 @@ function handleSwap(data) {
         return getUserID(users[users.length -1], data.slack.user)
           .then(function(user2) {
             var msg = `Looks like ${user1} and ${user2} are already on the same day!`;
-            if (scheduler.swapUsers(user1, user2)) {
+            if (dataHandler.swapUsers(user1, user2)) {
               msg = `Successfully swapped ${user1}'s and ${user2}'s groups days!`;
             }
             return Promise.resolve(msg);
@@ -190,7 +190,7 @@ function getMessageUsers(data) {
 }
 
 /**
- * Get the userID to use in the scheduler
+ * Get the userID to use in the dataHandler
  *
  * @param  {string} enteredName
  *         The name entered.

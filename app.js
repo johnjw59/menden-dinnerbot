@@ -6,7 +6,7 @@ var Wit = require('node-wit').Wit;
 var RtmClient = require('@slack/client').RtmClient;
 var RTM_EVENTS = require('@slack/client').RTM_EVENTS;
 
-var scheduler = require('./libs/scheduler.js');
+var dataHandler = require('./libs/dataHandler.js');
 var messageHandler = require('./libs/messageHandler.js');
 
 // Service connections.
@@ -61,8 +61,8 @@ var recurrence = {
 };
 
 schedule.scheduleJob(recurrence, function() {
-  var next = scheduler.getNext();
-  var follower = scheduler.getFollower(next.next);
+  var next = dataHandler.getNext();
+  var follower = dataHandler.getFollower(next.next);
 
   if ((next != null)) {
     var message = `${next.users[0]} and ${next.users[1]}, you two are on dinners next week!\n`;
@@ -78,8 +78,8 @@ schedule.scheduleJob(recurrence, function() {
 // Update users next date each week.
 recurrence.dayOfWeek = 1;
 schedule.scheduleJob(recurrence, function() {
-  var last = scheduler.getLast();
-  var curr = scheduler.getUsers(moment(moment().format('YYYY-MM-DD')).day(1).unix());
+  var last = dataHandler.getLast();
+  var curr = dataHandler.getUsers(moment(moment().format('YYYY-MM-DD')).day(1).unix());
 
-  scheduler.updateNext(curr[0], moment(last.next, 'X').add(1, 'w').unix());
+  dataHandler.updateNext(curr[0], moment(last.next, 'X').add(1, 'w').unix());
 });
