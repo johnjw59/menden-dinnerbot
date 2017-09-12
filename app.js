@@ -18,7 +18,7 @@ rtm.start();
 // React to messages.
 rtm.on(RTM_EVENTS.MESSAGE, function(message) {
   // We only care about regular messages that mention us.
-  if (!('subtype' in message) && (message.text.indexOf('<@U5G5UJ0QN>') != -1)) {
+  if (!('subtype' in message) && (message.text.indexOf(process.env.SLACK_BOT_ID) != -1)) {
     console.log(JSON.stringify(message));
 
     rtm.sendTyping(message.channel);

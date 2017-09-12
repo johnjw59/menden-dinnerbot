@@ -7,7 +7,7 @@ var scheduler = require('./scheduler.js');
 var WebClient = require('@slack/client').WebClient;
 
 var slackWeb = new WebClient(process.env.SLACK_API_TOKEN);
-var botID = 'U5G5UJ0QN';
+var botID = process.env.SLACK_BOT_ID;
 
 /**
  * Starting point of message interpretation.
