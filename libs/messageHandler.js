@@ -3,11 +3,11 @@
  */
 
 var moment = require('moment');
-var scheduler = require('./scheduler.js');
+var dataHandler = require('./dataHandler.js');
 var WebClient = require('@slack/client').WebClient;
 
 var slackWeb = new WebClient(process.env.SLACK_API_TOKEN);
-var botID = 'U5G5UJ0QN';
+var botID = process.env.SLACK_BOT_ID;
 
 /**
  * Starting point of message interpretation.
@@ -57,7 +57,7 @@ function handleGet(data) {
   if ('datetime' in data.entities) {
     // Grab the Monday of the week the date is in.
     var date = moment(data.entities.datetime[0].value).day(1);
-    var users = scheduler.getUsers(date.unix());
+    var users = dataHandler.getUsers(date.unix());
 
     if (Array.isArray(users)) {
       return Promise.resolve(`${users[0]} and ${users[1]} are on ${date.format('MMM Do')}.`);
@@ -66,38 +66,35 @@ function handleGet(data) {
       return Promise.resolve(`Looks like no one is scheduled to be on ${date.format('MMM Do')}!`);
     }
   }
-  else if (('contact' in data.entities) && (data.entities.contact.length > 1)) {
-    // Grab the first name that isn't our bot.
-    for (var i=0; i < data.entities.contact.length; i++) {
-      if (data.entities.contact[i].value.indexOf(botID) == -1) {
-        var name = data.entities.contact[i].value;
-        break;
-      }
-    }
-
-    // Get the userID to use in the lookup.
-    return getUserID(name, data.slack.user)
-      .then(function(user) {
-        var date = scheduler.getDate(user);
-
-        if (date != null) {
-          return Promise.resolve(`${user} is doing dinner next on ${moment(date, 'X').format('MMM Do')}`);
-        }
-        else {
-          return Promise.resolve(`Looks like ${user} isn't on the dinner schedule.`);
-        }
-      }, function(err) {
-        return Promise.reject(err);
-      }
-    );
-  }
   else {
-    var next = scheduler.getNext();
-    if (next != null) {
-      return Promise.resolve(`${next.users[0]} and ${next.users[1]} are on next.`);
+    var users = getMessageUsers(data);
+
+    if (users.length > 0) {
+      // Get the userID to use in the lookup and return a message.
+      return getUserID(users[0], data.slack.user)
+        .then(function(user) {
+          var date = dataHandler.getDate(user);
+
+          if (date != null) {
+            return Promise.resolve(`${user} is doing dinner next on ${moment(date, 'X').format('MMM Do')}`);
+          }
+          else {
+            return Promise.resolve(`Looks like ${user} isn't on the dinner schedule.`);
+          }
+        }, function(err) {
+          return Promise.reject(err);
+        }
+      );
     }
     else {
-      return Promise.resolve('Looks like no one is scheduled for the next four weeks!');
+      // Default to just grabbing the next people scheduled
+      var next = dataHandler.getNext();
+      if (next != null) {
+        return Promise.resolve(`${next.users[0]} and ${next.users[1]} are on next.`);
+      }
+      else {
+        return Promise.resolve('Looks like no one is scheduled for the next four weeks!');
+      }
     }
   }
 }
@@ -122,7 +119,7 @@ function handleSkip(data) {
     date = moment(data.entities.datetime[0].value).day(1);
   }
 
-  scheduler.postpone(date.unix());
+  dataHandler.postpone(date.unix());
 
   return Promise.resolve(`I've updated the schedule so there's no dinner on ${date.format('MMM Do')}.`);
 }
@@ -137,15 +134,10 @@ function handleSkip(data) {
  *         A resolved Promise object containing a confirmation message.
  */
 function handleSwap(data) {
-  // We need at least two users to be specified (excluding the bot).
-  if (('contact' in data.entities) && (data.entities.contact.length > 2)) {
-    var users = [];
+  var users = getMessageUsers(data);
 
-    for (var i=0; i < data.entities.contact.length; i++) {
-      if (data.entities.contact[i].value.indexOf(botID) == -1) {
-        users.push(data.entities.contact[i].value);
-      }
-    }
+  // We need at least two users to be specified (excluding the bot).
+  if (users.length >= 2) {
 
     // We'll assume we're swaping the first and last user mentioned.
     return getUserID(users[0], data.slack.user)
@@ -153,7 +145,7 @@ function handleSwap(data) {
         return getUserID(users[users.length -1], data.slack.user)
           .then(function(user2) {
             var msg = `Looks like ${user1} and ${user2} are already on the same day!`;
-            if (scheduler.swapUsers(user1, user2)) {
+            if (dataHandler.swapUsers(user1, user2)) {
               msg = `Successfully swapped ${user1}'s and ${user2}'s groups days!`;
             }
             return Promise.resolve(msg);
@@ -172,7 +164,33 @@ function handleSwap(data) {
 }
 
 /**
- * Get the userID to use in the scheduler
+ * Returns an array of users built from Wit data
+ *
+ * @param  {json}  data
+ *         The raw json data sent from Wit
+ *
+ * @return {array}
+ *         An array of the users in the data, excluding the bot user.
+ */
+function getMessageUsers(data) {
+  var user_entities = ['slack_users', 'contact'];
+  var users = [];
+
+  for (var i=0; i < user_entities.length; i++) {
+    if (user_entities[i] in data.entities) {
+      for (var j=0; j < data.entities[user_entities[i]].length; j++) {
+        if (data.entities[user_entities[i]][j].value.indexOf(botID) == -1) {
+          users.push(data.entities[user_entities[i]][j].value);
+        }
+      }
+    }
+  }
+
+  return users;
+}
+
+/**
+ * Get the userID to use in the dataHandler
  *
  * @param  {string} enteredName
  *         The name entered.
@@ -203,15 +221,17 @@ function getUserID(name, sender) {
           var userID = null;
 
           for (var i=0; i < data.members.length; i++) {
-            var member = data.members[i].real_name.split(' ');
+            if ('real_name' in data.members[i]) {
+              var member = data.members[i].real_name.split(' ');
 
-            for (var j=0; j < member.length; j++) {
-              if (member[j].toLowerCase() == name.toLowerCase()) {
-                userID = '<@' + data.members[i].id + '>';
+              for (var j=0; j < member.length; j++) {
+                if (member[j].toLowerCase() == name.toLowerCase()) {
+                  userID = '<@' + data.members[i].id + '>';
+                }
               }
+              // Leave loop if we found a userID.
+              if (userID != null) { break; }
             }
-            // Leave loop if we found a userID.
-            if (userID != null) { break; }
           }
 
           // If everything's failed, just use the name.
