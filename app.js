@@ -73,7 +73,7 @@ schedule.scheduleJob(recurrence, function() {
     }
 
     giphy.translate('dinner').then(function(res) {
-      rtm.sendMessage(res.data.bitly_gif_url + '\n\n' + message, 'C3Q22SRHC');
+      rtm.sendMessage(res.data.bitly_gif_url + '\n\n' + message, process.env.SLACK_CHANNEL_ID);
     })
   }
 });
