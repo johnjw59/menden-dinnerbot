@@ -5,6 +5,7 @@ var moment = require('moment');
 var Wit = require('node-wit').Wit;
 var RtmClient = require('@slack/client').RtmClient;
 var RTM_EVENTS = require('@slack/client').RTM_EVENTS;
+var giphy = require('giphy-api')(process.env.GIPHY_API_KEY);
 
 var dataHandler = require('./libs/dataHandler.js');
 var messageHandler = require('./libs/messageHandler.js');
@@ -71,7 +72,9 @@ schedule.scheduleJob(recurrence, function() {
       message += `${follower.users[0]} and ${follower.users[1]}, you guys are doing the discussion!`;
     }
 
-    rtm.sendMessage(message, 'C3Q22SRHC');
+    giphy.translate('dinner').then(function(res) {
+      rtm.sendMessage(res.data.bitly_gif_url + '\n\n' + message, process.env.SLACK_CHANNEL_ID);
+    })
   }
 });
 
