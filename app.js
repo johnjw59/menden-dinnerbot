@@ -54,21 +54,26 @@ rtm.on(RTM_EVENTS.MESSAGE, function(message) {
   }
 });
 
-// Post reminder on schedule.
+
+/********************
+ ** Scheduled Jobs **
+ ********************/
+
 var recurrence = {
   dayOfWeek: 4,
   hour: 18,
   minute: 30,
 };
 
+// Post reminder on schedule.
 schedule.scheduleJob(recurrence, function() {
   var next = dataHandler.getNext();
   var follower = dataHandler.getFollower(next.next);
 
-  if ((next != null)) {
+  if (next !== null) {
     var message = `${next.users[0]} and ${next.users[1]}, you two are on dinners next week!\n`;
 
-    if (follower != null) {
+    if (follower !== null) {
       message += `${follower.users[0]} and ${follower.users[1]}, you guys are doing the discussion!`;
     }
 
@@ -84,5 +89,7 @@ schedule.scheduleJob(recurrence, function() {
   var last = dataHandler.getLast();
   var curr = dataHandler.getUsers(moment(moment().format('YYYY-MM-DD')).day(1).unix());
 
-  dataHandler.updateNext(curr[0], moment(last.next, 'X').add(1, 'w').unix());
+  if (curr !== null) {
+    dataHandler.updateNext(curr[0], moment(last.next, 'X').add(1, 'w').unix());
+  }
 });

@@ -75,7 +75,7 @@ function handleGet(data) {
         .then(function(user) {
           var date = dataHandler.getDate(user);
 
-          if (date != null) {
+          if (date !== null) {
             return Promise.resolve(`${user} is doing dinner next on ${moment(date, 'X').format('MMM Do')}`);
           }
           else {
@@ -89,7 +89,7 @@ function handleGet(data) {
     else {
       // Default to just grabbing the next people scheduled
       var next = dataHandler.getNext();
-      if (next != null) {
+      if (next !== null) {
         return Promise.resolve(`${next.users[0]} and ${next.users[1]} are on next.`);
       }
       else {
@@ -230,12 +230,12 @@ function getUserID(name, sender) {
                 }
               }
               // Leave loop if we found a userID.
-              if (userID != null) { break; }
+              if (userID !== null) { break; }
             }
           }
 
           // If everything's failed, just use the name.
-          if (userID == null) {
+          if (userID === null) {
             userID = name.charAt(0).toUpperCase() + name.toLowerCase().slice(1);
           }
 

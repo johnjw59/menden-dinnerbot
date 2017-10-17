@@ -25,7 +25,7 @@ function getNext() {
   for (var i=0; i < 4; i++) {
     next = getUsers(date.unix());
 
-    if (next != null) {
+    if (next !== null) {
       break;
     }
     else {
