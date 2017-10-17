@@ -87,8 +87,9 @@ function handleGet(data) {
       );
     }
     else {
-      // Default to just grabbing the next people scheduled
-      var next = dataHandler.getNext();
+      // Default to just grabbing the next people scheduled.
+      // We'll check the next 4 Mondays looking for the next person.
+      var next = dataHandler.getNext(4);
       if (next !== null) {
         return Promise.resolve(`${next.users[0]} and ${next.users[1]} are on next.`);
       }

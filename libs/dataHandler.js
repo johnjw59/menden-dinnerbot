@@ -9,11 +9,15 @@ var dataFile = 'data/schedule.json';
 /**
  * Looks for the next person by date by making calls to get().
  *
+ * @param {int} num_tries
+ *        The number of weeks to keep looking for a result at.
+ *        Defaults to 1 (only check the next Monday).
+ *
  * @return {object}
  *         An object containing an array of usernames of the next users
  *         and the date they will be on.
  */
-function getNext() {
+function getNext(num_tries = 1) {
   // Get next Monday.
   var date = moment(moment().format('YYYY-MM-DD')).day(1);
   if (moment().isAfter(date)) {
@@ -22,7 +26,7 @@ function getNext() {
 
   // We'll try the next four Mondays.
   var next;
-  for (var i=0; i < 4; i++) {
+  for (var i=0; i < num_tries; i++) {
     next = getUsers(date.unix());
 
     if (next !== null) {

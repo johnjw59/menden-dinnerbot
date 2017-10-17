@@ -71,15 +71,21 @@ schedule.scheduleJob(recurrence, function() {
   var follower = dataHandler.getFollower(next.next);
 
   if (next !== null) {
-    var message = `${next.users[0]} and ${next.users[1]}, you two are on dinners next week!\n`;
+    var message = `${next.users[0]} and ${next.users[1]}, you two are on dinners next week!`;
 
     if (follower !== null) {
-      message += `${follower.users[0]} and ${follower.users[1]}, you guys are doing the discussion!`;
+      message += `\n${follower.users[0]} and ${follower.users[1]}, you guys are doing the discussion!`;
     }
 
     giphy.translate('dinner').then(function(res) {
       rtm.sendMessage(res.data.bitly_gif_url + '\n\n' + message, process.env.SLACK_CHANNEL_ID);
     })
+  }
+  else if (follower !== null) {
+    // Message for if there's no dinner this week, but one next week
+    var message = 'Looks like there\'s no dinner this week!\n' +
+                  `${follower.users[0]} and ${follower.users[1]}, you guys are doing dinner next week!`;
+    rtm.sendMessage(message, process.env.SLACK_CHANNEL_ID);
   }
 });
 
