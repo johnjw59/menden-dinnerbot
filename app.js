@@ -18,8 +18,9 @@ rtm.start();
 
 // React to messages.
 rtm.on(RTM_EVENTS.MESSAGE, function(message) {
-  // We only care about regular messages that mention us.
-  if (!('subtype' in message) && (message.text.indexOf(process.env.SLACK_BOT_ID) != -1)) {
+  // We only care about regular messages that mention us or are direct messages.
+  if (!('subtype' in message) &&
+    ((message.text.indexOf(process.env.SLACK_BOT_ID) != -1) || (message.channel == process.env.SLACK_BOT_DM_ID))) {
     console.log(JSON.stringify(message));
 
     rtm.sendTyping(message.channel);
@@ -54,27 +55,38 @@ rtm.on(RTM_EVENTS.MESSAGE, function(message) {
   }
 });
 
-// Post reminder on schedule.
+
+/********************
+ ** Scheduled Jobs **
+ ********************/
+
 var recurrence = {
   dayOfWeek: 4,
   hour: 18,
   minute: 30,
 };
 
+// Post reminder on schedule.
 schedule.scheduleJob(recurrence, function() {
   var next = dataHandler.getNext();
   var follower = dataHandler.getFollower(next.next);
 
-  if ((next != null)) {
-    var message = `${next.users[0]} and ${next.users[1]}, you two are on dinners next week!\n`;
+  if (next !== null) {
+    var message = `${next.users[0]} and ${next.users[1]}, you two are on dinners next week!`;
 
-    if (follower != null) {
-      message += `${follower.users[0]} and ${follower.users[1]}, you guys are doing the discussion!`;
+    if (follower !== null) {
+      message += `\n${follower.users[0]} and ${follower.users[1]}, you guys are doing the discussion!`;
     }
 
     giphy.translate('dinner').then(function(res) {
       rtm.sendMessage(res.data.bitly_gif_url + '\n\n' + message, process.env.SLACK_CHANNEL_ID);
     })
+  }
+  else if (follower !== null) {
+    // Message for if there's no dinner this week, but one next week
+    var message = 'Looks like there\'s no dinner this week!\n' +
+                  `${follower.users[0]} and ${follower.users[1]}, you guys are doing dinner next week!`;
+    rtm.sendMessage(message, process.env.SLACK_CHANNEL_ID);
   }
 });
 
@@ -84,5 +96,7 @@ schedule.scheduleJob(recurrence, function() {
   var last = dataHandler.getLast();
   var curr = dataHandler.getUsers(moment(moment().format('YYYY-MM-DD')).day(1).unix());
 
-  dataHandler.updateNext(curr[0], moment(last.next, 'X').add(1, 'w').unix());
+  if (curr !== null) {
+    dataHandler.updateNext(curr[0], moment(last.next, 'X').add(1, 'w').unix());
+  }
 });
