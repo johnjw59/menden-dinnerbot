@@ -78,9 +78,11 @@ schedule.scheduleJob(recurrence, function() {
       message += `\n${follower.users[0]} and ${follower.users[1]}, you guys are doing the discussion!`;
     }
 
-    giphy.translate('dinner').then(function(res) {
-      rtm.sendMessage(res.data.bitly_gif_url + '\n\n' + message, process.env.SLACK_CHANNEL_ID);
-    })
+    giphy.random('dinner').then(function(res) {
+      giphy.id(res.data.id).then(function(res) {
+        rtm.sendMessage(message + '\n\n' + res.data[0].bitly_gif_url, process.env.SLACK_CHANNEL_ID);
+      });
+    });
   }
   else if (follower !== null) {
     // Message for if there's no dinner this week, but one next week
