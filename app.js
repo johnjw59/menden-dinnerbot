@@ -19,8 +19,9 @@ rtm.start();
 // React to messages.
 rtm.on(RTM_EVENTS.MESSAGE, function(message) {
   // We only care about regular messages that mention us or are direct messages.
-  if (!('subtype' in message) &&
+  if (!('subtype' in message) && (message.user != process.env.SLACK_BOT_ID) &&
     ((message.text.indexOf(process.env.SLACK_BOT_ID) != -1) || (message.channel == process.env.SLACK_BOT_DM_ID))) {
+
     console.log(JSON.stringify(message));
 
     rtm.sendTyping(message.channel);
@@ -71,7 +72,7 @@ schedule.scheduleJob(recurrence, function() {
   var next = dataHandler.getNext();
   var follower = dataHandler.getFollower(next.next);
 
-  if (next !== null) {
+  if (next.users !== null) {
     var message = `${next.users[0]} and ${next.users[1]}, you two are on dinners next week!`;
 
     if (follower !== null) {
