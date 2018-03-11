@@ -60,3 +60,6 @@ typings/
 # Don't keep database files
 data/*
 !data/.gitkeep
+
+# log4js config file
+logging.json

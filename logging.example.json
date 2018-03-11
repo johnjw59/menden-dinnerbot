@@ -1,0 +1,34 @@
+{
+  "appenders": {
+    "default": {
+      "type": "console"
+    },
+    "email": {
+      "type": "smtp",
+      "recipients": "***YOUR EMAIL***",
+      "sendInterval": 0,
+      "transport": "SMTP",
+      "SMTP": {
+        "host": "***SMTP HOST***",
+        "port": 465,
+        "secure": true,
+        "subject": "Dinnerbot experienced an error!",
+        "auth": {
+          "user": "***SMTP USERNAME***",
+          "pass": "***SMTP PASSWORD***"
+        }
+      }
+    },
+    "errors": {
+      "type": "logLevelFilter",
+      "appender": "email",
+      "level": "error"
+    }
+  },
+  "categories": {
+    "default": {
+      "appenders": ["default", "errors"],
+      "level": "debug"
+    }
+  }
+}
