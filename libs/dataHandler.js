@@ -202,9 +202,9 @@ function postpone(date) {
   setData(data);
 }
 
-/*********************************
- **      PRIVATE FUNCTIONS      **
- *********************************/
+////////////////////////
+//  Helper functions  //
+////////////////////////
 
 function getData() {
   return jsonfile.readFileSync(dataFile);

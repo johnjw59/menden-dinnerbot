@@ -26,7 +26,18 @@ rtm.on(RTM_EVENTS.MESSAGE, function(message) {
 
     rtm.sendTyping(message.channel);
 
-    if (message.text.toLowerCase().indexOf('help') == -1) {
+    if (message.text.toLowerCase().indexOf('help') != -1) {
+      // Send help message.
+      rtm.sendMessage('Go ask John for help, I\'m busy!', message.channel);
+    }
+    else if (message.text == 'post_reminder') {
+      // This is a special message that forces a reminder post.
+      // For now it's just set to a magic message trigger, eventually should be
+      // integrated into the messageHandler class.
+      postReminder();
+      rtm.sendMessage('The reminder has been posted!', message.channel);
+    }
+    else {
       wit.message(message.text, {})
       .then(function(data) {
         console.log(JSON.stringify(data));
@@ -49,31 +60,19 @@ rtm.on(RTM_EVENTS.MESSAGE, function(message) {
         console.error(err);
       });
     }
-    else {
-      // Send help message.
-      rtm.sendMessage('Go ask John for help, I\'m busy!', message.channel);
-    }
   }
 });
 
-
-/********************
- ** Scheduled Jobs **
- ********************/
-
-var recurrence = {
-  dayOfWeek: 4,
-  hour: 18,
-  minute: 30,
-};
-
-// Post reminder on schedule.
-schedule.scheduleJob(recurrence, function() {
+/**
+ * Posts a reminder into the dinner notification channel.
+ */
+function postReminder() {
   var next = dataHandler.getNext();
   var follower = dataHandler.getFollower(next.next);
+  var message = '';
 
   if (next.users !== null) {
-    var message = `${next.users[0]} and ${next.users[1]}, you two are on dinners next week!`;
+    message = `${next.users[0]} and ${next.users[1]}, you two are on dinners next week!`;
 
     if (follower !== null) {
       message += `\n${follower.users[0]} and ${follower.users[1]}, you guys are doing the discussion!`;
@@ -87,10 +86,26 @@ schedule.scheduleJob(recurrence, function() {
   }
   else if (follower !== null) {
     // Message for if there's no dinner this week, but one next week
-    var message = 'Looks like there\'s no dinner this week!\n' +
-                  `${follower.users[0]} and ${follower.users[1]}, you guys are doing dinner next week!`;
+    message = 'Looks like there\'s no dinner this week!\n' +
+              `${follower.users[0]} and ${follower.users[1]}, you guys are doing dinner next week!`;
     rtm.sendMessage(message, process.env.SLACK_CHANNEL_ID);
   }
+}
+
+
+////////////////////
+// Scheduled Jobs //
+////////////////////
+
+var recurrence = {
+  dayOfWeek: 4,
+  hour: 18,
+  minute: 30,
+};
+
+// Post reminder on schedule.
+schedule.scheduleJob(recurrence, function() {
+  postReminder();
 });
 
 // Update users next date each week.

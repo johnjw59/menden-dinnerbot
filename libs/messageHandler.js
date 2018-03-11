@@ -38,10 +38,6 @@ function handleMessage(data) {
    }
 }
 
-/*******************************
- **     HELPER FUNCTIONS      **
- *******************************/
-
 /**
  * Handle a "get" intent.
  * User could be trying to get the next dinner, a date for a user
@@ -163,6 +159,11 @@ function handleSwap(data) {
     return Promise.resolve('You need to tell me which two users to swap!');
   }
 }
+
+
+////////////////////////
+//  Helper functions  //
+////////////////////////
 
 /**
  * Returns an array of users built from Wit data
