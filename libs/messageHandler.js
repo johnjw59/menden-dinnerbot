@@ -38,10 +38,6 @@ function handleMessage(data) {
    }
 }
 
-/*******************************
- **     HELPER FUNCTIONS      **
- *******************************/
-
 /**
  * Handle a "get" intent.
  * User could be trying to get the next dinner, a date for a user
@@ -90,7 +86,7 @@ function handleGet(data) {
       // Default to just grabbing the next people scheduled.
       // We'll check the next 4 Mondays looking for the next person.
       var next = dataHandler.getNext(4);
-      if (next !== null) {
+      if (next.users !== null) {
         return Promise.resolve(`${next.users[0]} and ${next.users[1]} are on next.`);
       }
       else {
@@ -163,6 +159,11 @@ function handleSwap(data) {
     return Promise.resolve('You need to tell me which two users to swap!');
   }
 }
+
+
+////////////////////////
+//  Helper functions  //
+////////////////////////
 
 /**
  * Returns an array of users built from Wit data
