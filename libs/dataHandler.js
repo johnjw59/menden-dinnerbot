@@ -27,9 +27,13 @@ function getNext(num_tries = 1) {
   // Check the specified number of mondays.
   var next;
   for (var i=0; i < num_tries; i++) {
-    next = getUsers(date.day(i * 8).unix());
+    next = getUsers(date.add(i * 7, 'days').unix());
+
     if (next !== null) {
       break;
+    }
+    else {
+      date = date.day(8);
     }
   }
 
