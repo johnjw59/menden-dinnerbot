@@ -5,6 +5,7 @@
 var moment = require('moment');
 var dataHandler = require('./dataHandler.js');
 var WebClient = require('@slack/client').WebClient;
+var giphy = require('giphy-api')(process.env.GIPHY_API_KEY);
 
 var slackWeb = new WebClient(process.env.SLACK_API_TOKEN);
 var botID = process.env.SLACK_BOT_ID;
@@ -30,8 +31,11 @@ function handleMessage(data) {
     case 'swap':
       return handleSwap(data);
 
+    case 'reminder':
+      return handleReminder(data);
+
     case 'thanks':
-      return Promise.resolve('You\'re welcome');
+      return Promise.resolve('You\'re welcome!');
 
     default:
       return Promise.reject(`Unhandled intent: ${JSON.stringify(data)}`);
@@ -158,6 +162,67 @@ function handleSwap(data) {
   else {
     return Promise.resolve('You need to tell me which two users to swap!');
   }
+}
+
+/**
+ * Handle a "reminder" intent.
+ * This will post a reminder in the notification channel and reply that
+ * the notification has been posted.
+ *
+ * @param  {object} data
+ *         JSON object from wit.ai.
+ *
+ * @return {Promise}
+ *         A resolved Promise object containing a confirmation message.
+ */
+function handleReminder(data) {
+  return new Promise(function(resolve, reject) {
+    var next = dataHandler.getNext();
+    var follower = dataHandler.getFollower(next.next);
+    var message = '';
+
+    if (next.users !== null) {
+      message = `${next.users[0]} and ${next.users[1]}, you two are on dinners next week!`;
+
+      if (follower !== null) {
+        message += `\n${follower.users[0]} and ${follower.users[1]}, you guys are doing the discussion!`;
+      }
+
+      // Add a gif the reply!
+      giphy.random({tag: 'dinner', rating: 'PG-13'}).then(function(res) {
+        giphy.id(res.data.id)
+          .then(function(res) {
+            resolve(message + '\n\n' + res.data[0].bitly_gif_url);
+          }, function(err) {
+            reject(err);
+          });
+      });
+    }
+    else if (follower !== null) {
+      // Message for if there's no dinner this week, but one next week.
+      resolve('Looks like there\'s no dinner this week!\n' +
+              `${follower.users[0]} and ${follower.users[1]}, you guys are doing dinner next week!`);
+    }
+    else {
+      resolve(null);
+    }
+  })
+  .then(function(msg) {
+    if (msg === null) {
+      return Promise.resolve('Looks like there\'s no one on for the next two weeks!');
+    }
+    else {
+      // Post the message to the notification channel.
+      return slackWeb.chat.postMessage(process.env.SLACK_CHANNEL_ID, msg)
+        .then(function(response) {
+          return Promise.resolve('The reminder has been posted!');
+        }, function (err) {
+          return Promise.reject(err);
+        });
+    }
+  }, function(err) {
+    return Promise.reject(err);
+  });
 }
 
 

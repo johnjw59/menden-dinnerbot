@@ -5,7 +5,6 @@ var moment = require('moment');
 var Wit = require('node-wit').Wit;
 var RtmClient = require('@slack/client').RtmClient;
 var RTM_EVENTS = require('@slack/client').RTM_EVENTS;
-var giphy = require('giphy-api')(process.env.GIPHY_API_KEY);
 
 var dataHandler = require('./libs/dataHandler.js');
 var messageHandler = require('./libs/messageHandler.js');
@@ -28,14 +27,7 @@ rtm.on(RTM_EVENTS.MESSAGE, function(message) {
 
     if (message.text.toLowerCase().indexOf('help') != -1) {
       // Send help message.
-      rtm.sendMessage('Go ask John for help, I\'m busy!', message.channel);
-    }
-    else if (message.text == 'post_reminder') {
-      // This is a special message that forces a reminder post.
-      // For now it's just set to a magic message trigger, eventually should be
-      // integrated into the messageHandler class.
-      postReminder();
-      rtm.sendMessage('The reminder has been posted!', message.channel);
+      rtm.sendMessage('You can read about what I\'m capable of here: https://github.com/johnjw59/menden-dinnerbot#commands', message.channel);
     }
     else {
       wit.message(message.text, {})
@@ -48,13 +40,14 @@ rtm.on(RTM_EVENTS.MESSAGE, function(message) {
             .then(function(msg) {
               rtm.sendMessage(msg, message.channel);
             }, function(err) {
+              rtm.sendMessage('Sorry, there was a problem.', message.channel);
               console.error(err);
             }
           );
         }
         else {
           // Send "I don't understand that" message.
-          rtm.sendMessage('Sorry, I don\'t understand what you said. Go ask John what you did wrong.', message.channel);
+          rtm.sendMessage('Sorry, I don\'t understand what you said. Type "help" if you need assistance.', message.channel);
         }
       }, function(err) {
         console.error(err);
@@ -63,41 +56,12 @@ rtm.on(RTM_EVENTS.MESSAGE, function(message) {
   }
 });
 
-/**
- * Posts a reminder into the dinner notification channel.
- */
-function postReminder() {
-  var next = dataHandler.getNext();
-  var follower = dataHandler.getFollower(next.next);
-  var message = '';
-
-  if (next.users !== null) {
-    message = `${next.users[0]} and ${next.users[1]}, you two are on dinners next week!`;
-
-    if (follower !== null) {
-      message += `\n${follower.users[0]} and ${follower.users[1]}, you guys are doing the discussion!`;
-    }
-
-    giphy.random('dinner').then(function(res) {
-      giphy.id(res.data.id).then(function(res) {
-        rtm.sendMessage(message + '\n\n' + res.data[0].bitly_gif_url, process.env.SLACK_CHANNEL_ID);
-      });
-    });
-  }
-  else if (follower !== null) {
-    // Message for if there's no dinner this week, but one next week
-    message = 'Looks like there\'s no dinner this week!\n' +
-              `${follower.users[0]} and ${follower.users[1]}, you guys are doing dinner next week!`;
-    rtm.sendMessage(message, process.env.SLACK_CHANNEL_ID);
-  }
-}
-
 
 ////////////////////
 // Scheduled Jobs //
 ////////////////////
 
-var recurrence = {
+/*var recurrence = {
   dayOfWeek: 4,
   hour: 18,
   minute: 30,
@@ -105,7 +69,13 @@ var recurrence = {
 
 // Post reminder on schedule.
 schedule.scheduleJob(recurrence, function() {
-  postReminder();
+  // Just mock the data we need to trigger the correct reminderHandler.
+  messageHandler({entities: {intent: {0: {value: 'reminder'} } } })
+    .then(function(){
+      // Nothing to do here.
+    }, function(err) {
+      console.error(err);
+    });
 });
 
 // Update users next date each week.
@@ -117,4 +87,4 @@ schedule.scheduleJob(recurrence, function() {
   if (curr !== null) {
     dataHandler.updateNext(curr[0], moment(last.next, 'X').add(1, 'w').unix());
   }
-});
+});*/
