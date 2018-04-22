@@ -78,7 +78,7 @@ function postReminder() {
       message += `\n${follower.users[0]} and ${follower.users[1]}, you guys are doing the discussion!`;
     }
 
-    giphy.random('dinner').then(function(res) {
+    giphy.random({tag: 'dinner', 'rating': 'PG-13'}).then(function(res) {
       giphy.id(res.data.id).then(function(res) {
         rtm.sendMessage(message + '\n\n' + res.data[0].bitly_gif_url, process.env.SLACK_CHANNEL_ID);
       });
