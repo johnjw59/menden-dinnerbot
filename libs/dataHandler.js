@@ -18,22 +18,18 @@ var dataFile = 'data/schedule.json';
  *         and the date they will be on.
  */
 function getNext(num_tries = 1) {
-  // Get next Monday.
+  // Get the next Monday.
   var date = moment(moment().format('YYYY-MM-DD')).day(1);
   if (moment().isAfter(date)) {
     date.day(8);
   }
 
-  // We'll try the next four Mondays.
+  // Check the specified number of mondays.
   var next;
   for (var i=0; i < num_tries; i++) {
-    next = getUsers(date.unix());
-
+    next = getUsers(date.day(i * 8).unix());
     if (next !== null) {
       break;
-    }
-    else {
-      date = date.day(8);
     }
   }
 
