@@ -61,7 +61,7 @@ rtm.on(RTM_EVENTS.MESSAGE, function(message) {
 // Scheduled Jobs //
 ////////////////////
 
-/*var recurrence = {
+var recurrence = {
   dayOfWeek: 4,
   hour: 18,
   minute: 30,
@@ -87,4 +87,4 @@ schedule.scheduleJob(recurrence, function() {
   if (curr !== null) {
     dataHandler.updateNext(curr[0], moment(last.next, 'X').add(1, 'w').unix());
   }
-});*/
+});
