@@ -88,10 +88,9 @@ function handleGet(data) {
     }
     else {
       // Default to just grabbing the next people scheduled.
-      // We'll check the next 4 Mondays looking for the next person.
-      var next = dataHandler.getNext(4);
+      var next = dataHandler.getNext(Infinity);
       if (next.users !== null) {
-        return Promise.resolve(`${next.users[0]} and ${next.users[1]} are on next.`);
+        return Promise.resolve(`${next.users[0]} and ${next.users[1]} are up next on ${moment(next.next, 'X').format('MMM Do')}.`);
       }
       else {
         return Promise.resolve('Looks like no one is scheduled for the next four weeks!');
@@ -185,7 +184,7 @@ function handleReminder(data) {
       message = `${next.users[0]} and ${next.users[1]}, you two are on dinners next week!`;
 
       if (follower !== null) {
-        message += `\n${follower.users[0]} and ${follower.users[1]}, you guys are doing the discussion!`;
+        message += `\n${follower[0]} and ${follower[1]}, you guys are doing the discussion!`;
       }
 
       // Add a gif the reply!
@@ -201,7 +200,7 @@ function handleReminder(data) {
     else if (follower !== null) {
       // Message for if there's no dinner this week, but one next week.
       resolve('Looks like there\'s no dinner this week!\n' +
-              `${follower.users[0]} and ${follower.users[1]}, you guys are doing dinner next week!`);
+              `${follower[0]} and ${follower[1]}, you guys are doing dinner next week!`);
     }
     else {
       resolve(null);

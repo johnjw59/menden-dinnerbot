@@ -12,12 +12,18 @@ var dataFile = 'data/schedule.json';
  * @param {int} num_tries
  *        The number of weeks to keep looking for a result at.
  *        Defaults to 1 (only check the next Monday).
+ *        Will stop after checking each user group.
  *
  * @return {object}
  *         An object containing an array of usernames of the next users
  *         and the date they will be on.
  */
 function getNext(num_tries = 1) {
+  var data = getData();
+
+  // Maximum number of tries is the number of user groups.
+  num_tries = Math.min(num_tries, data.schedule.length);
+
   // Get the next Monday.
   var date = moment(moment().format('YYYY-MM-DD')).day(1);
   if (moment().isAfter(date)) {
@@ -31,9 +37,6 @@ function getNext(num_tries = 1) {
 
     if (next !== null) {
       break;
-    }
-    else {
-      date = date.day(8);
     }
   }
 
@@ -72,23 +75,13 @@ function getLast() {
  *
  * @param {int} date
  *        The starting date.
- *        We want a user with the closest date greater than this.
  *
  * @return {object}
  *         The schedule object for the followers.
  *         Includes date and array of users.
  */
 function getFollower(date) {
-  var data = getData();
-  var follower = null;
-
-  for (var i=0; i < data.schedule.length; i++) {
-    if ((follower === null) || ((data.schedule[i].next > date) && (data.schedule[i].next < follower.next))) {
-      follower = data.schedule[i];
-    }
-  }
-
-  return follower;
+  return getUsers(moment(date, 'X').add(1, 'w').unix());
 }
 
 /**
