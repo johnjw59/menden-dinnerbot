@@ -60,7 +60,7 @@ function handleGet(data) {
     var users = dataHandler.getUsers(date.unix());
 
     if (Array.isArray(users)) {
-      return Promise.resolve(`${users[0]} and ${users[1]} are on ${date.format('MMM Do')}.`);
+      return Promise.resolve(`${buildUserString(users)} are on ${date.format('MMM Do')}.`);
     }
     else {
       return Promise.resolve(`Looks like no one is scheduled to be on ${date.format('MMM Do')}!`);
@@ -90,7 +90,7 @@ function handleGet(data) {
       // Default to just grabbing the next people scheduled.
       var next = dataHandler.getNext(Infinity);
       if (next.users !== null) {
-        return Promise.resolve(`${next.users[0]} and ${next.users[1]} are up next on ${moment(next.next, 'X').format('MMM Do')}.`);
+        return Promise.resolve(`${buildUserString(next.users)} are up next on ${moment(next.next, 'X').format('MMM Do')}.`);
       }
       else {
         return Promise.resolve('Looks like no one is scheduled for the next four weeks!');
@@ -181,10 +181,10 @@ function handleReminder(data) {
     var message = '';
 
     if (next.users !== null) {
-      message = `${next.users[0]} and ${next.users[1]}, you two are on dinners next week!`;
+      message = `${buildUserString(next.users)}, you are on dinner next week!`;
 
       if (follower !== null) {
-        message += `\n${follower[0]} and ${follower[1]}, you guys are doing the discussion!`;
+        message += `\n${buildUserString(follower)}, you guys are doing the discussion!`;
       }
 
       // Add a gif the reply!
@@ -200,7 +200,7 @@ function handleReminder(data) {
     else if (follower !== null) {
       // Message for if there's no dinner this week, but one next week.
       resolve('Looks like there\'s no dinner this week!\n' +
-              `${follower[0]} and ${follower[1]}, you guys are doing dinner next week!`);
+              `${buildUserString(follower)}, you guys are doing dinner the week after!`);
     }
     else {
       resolve(null);
@@ -313,6 +313,32 @@ function getUserID(name, sender) {
       });
     }
   });
+}
+
+/**
+ * Format an array of users into a string for display.
+ *
+ * @param {array} users
+ *   The array of user names.
+ *
+ * @return {string}
+ *   The formatted string for display.
+ */
+function buildUserString(users) {
+  var string = '';
+
+  for (var i=0; i < users.length; i++) {
+    string += users[i];
+
+    if (i === (users.length - 2)) {
+      string += ' and ';
+    }
+    else if (i !== (users.length - 1)) {
+      string += ', ';
+    }
+  }
+
+  return string;
 }
 
 module.exports = handleMessage;
